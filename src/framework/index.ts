@@ -18,6 +18,22 @@ export function Tag(name?: string, ext?: string) {
   };
 }
 
+export function createStorageItem(key: string, initial: {}): Storage {
+  const initialState: string = JSON.stringify(initial);
+  const storage: Storage = localStorage;
+
+  return new Proxy(storage, {
+    get: (target: Storage, prop: string) => {
+      return JSON.parse(target.getItem(key) || initialState)[prop];
+    },
+    set: (target: Storage, prop: string, value: unknown) => {
+      const previousState = JSON.parse(target.getItem(key) || initialState);
+      target.setItem(key, JSON.stringify({ ...previousState, [prop]: value }));
+      return true;
+    },
+  });
+}
+
 function createTagName(className: string) {
   return (
     'c' +
